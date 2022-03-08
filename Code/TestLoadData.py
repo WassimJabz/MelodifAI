@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 import music21
 from music21 import *
+from music21 import converter, chord, note, stream, environment, instrument
 import sys
 import IPython
 from IPython.display import Image, Audio
@@ -40,8 +41,14 @@ def extract_notes(file):
             for element in pick:
                 if isinstance(element, note.Note):
                     notes.append(element)
+                    #notes.append(str(element.pitch))
                 elif isinstance(element, chord.Chord):
                     notes.append(element)
+                    #notes.append(".".join(str(n) for n in element.normalOrder))
+                #elif isinstance(element, note.Rest):
+                 #   notes.append(element)
+            
+                
                 
 
     return notes
@@ -64,11 +71,12 @@ def chords_n_notes(Snippet):
             notes = [] 
             for j in chord_notes:
                 inst_note=int(j)
-                note_snip = note.Note(inst_note)            
+                note_snip = note.Note(inst_note)           
                 notes.append(note_snip)
                 chord_snip = chord.Chord(notes)
                 chord_snip.offset = offset
                 Melody.append(chord_snip)
+                
         # pattern is a note
         else: 
             note_snip = note.Note(i)
@@ -76,16 +84,47 @@ def chords_n_notes(Snippet):
             Melody.append(note_snip)
         # increase offset each iteration so that notes do not stack
         offset += 1
-    Melody_midi = stream.Stream(Melody)   
+    Melody_midi = stream.Stream(Melody)
     return Melody_midi
 
 
-#Melody_Snippet = chords_n_notes(Corpus[:100])
+def chords_n_notes_duration(Snippet):
+    """show notes and chords"""
+    Melody = stream.Stream()
+    #offset = 0.0 #Incremental
+    for element in Snippet:
+        #If it is chord
+        if isinstance(element, chord.Chord):
+            note_snip = chord.Chord(element.pitches)
+            note_snip.duration = element.duration
+            note_snip.offset = element.offset
+            Melody.insert(note_snip)
+            #offset += element.duration.quarterLength
+        # pattern is a note
+        elif isinstance(element, note.Note):
+            note_snip = note.Note(element.pitch)
+            note_snip.duration = element.duration
+            note_snip.offset = element.offset
+            Melody.insert(note_snip)
+            #offset += element.duration.quarterLength
+        else:
+            note_snip = note.Rest()
+            note_snip.duration = element.duration
+            note_snip.offset = element.offset
+            Melody.insert(note_snip)
+            #offset += element.duration.quarterLength
+        # increase offset each iteration so that notes do not stack
+        #offset +=1
+    #Melody_midi = stream.Stream(Melody)
+    Melody_midi = Melody
+    return Melody_midi
+
+
+Melody_Snippet = chords_n_notes_duration(Corpus[:300])
+
 #Melody_Snippet = stream.Stream(Corpus[:300])
-Melody_Snippet = all_midis[0]
+#Melody_Snippet = all_midis[0]
 #show(Melody_Snippet)
 
 
-Melody_Snippet.show("musicxml.png")
-Melody_Snippet.show('midi')
-
+Melody_Snippet.show()
