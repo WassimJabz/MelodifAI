@@ -165,11 +165,11 @@ plt.show()
 
 rare_note = []
 for index, (key, value) in enumerate(count_num.items()):
-    if value < 0:
+    if value < 20:
         m =  key
         rare_note.append(m)
         
-print("Total number of notes that occur less than 0 times:", len(rare_note))
+print("Total number of notes that occur less than 20 times:", len(rare_note))
 
 for element in Corpus:
     if element in rare_note:
@@ -237,7 +237,7 @@ model.compile(loss='categorical_crossentropy', optimizer=opt)
 model.summary()
 
 #Training the Model
-history = model.fit(X_train, y_train, batch_size=256, epochs=200)
+history = model.fit(X_train, y_train, batch_size=256, epochs=100)
 
 
 
