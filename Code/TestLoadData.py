@@ -7,7 +7,15 @@ from music21 import converter, chord, note, stream, environment, instrument
 import sys
 import IPython
 from IPython.display import Image, Audio
+import matplotlib.pyplot as plt 
 from IPython.display import display
+import numpy as np 
+#import pandas as pd 
+from collections import Counter
+from sklearn.model_selection import train_test_split
+
+
+
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -40,11 +48,11 @@ def extract_notes(file):
             pick = part.recurse()
             for element in pick:
                 if isinstance(element, note.Note):
-                    notes.append(element)
-                    #notes.append(str(element.pitch))
+                    #notes.append(element)
+                    notes.append(str(element.pitch))
                 elif isinstance(element, chord.Chord):
-                    notes.append(element)
-                    #notes.append(".".join(str(n) for n in element.normalOrder))
+                    #notes.append(element)
+                    notes.append(".".join(str(n) for n in element.normalOrder))
                 #elif isinstance(element, note.Rest):
                  #   notes.append(element)
             
@@ -120,11 +128,85 @@ def chords_n_notes_duration(Snippet):
     return Melody_midi
 
 
-Melody_Snippet = chords_n_notes_duration(Corpus[:300])
+Melody_Snippet = chords_n_notes(Corpus[:300])
 
 #Melody_Snippet = stream.Stream(Corpus[:300])
 #Melody_Snippet = all_midis[0]
 #show(Melody_Snippet)
 
+count_num = Counter(Corpus)
+print("Total unique notes in the Corpus:", len(count_num))
 
-Melody_Snippet.show()
+Notes = list(count_num.keys())
+Recurrence = list(count_num.values())
+
+def Average(lst):
+    return sum(lst) / len(lst)
+print("Average recurrenc for a note in Corpus:", Average(Recurrence))
+print("Most frequent note in Corpus appeared:", max(Recurrence), "times")
+print("Least frequent note in Corpus appeared:", min(Recurrence), "time")
+
+plt.figure(figsize=(18,3),facecolor="#97BACB")
+bins = np.arange(0,(max(Recurrence)), 10) 
+plt.hist(Recurrence, bins=bins, color="#97BACB")
+plt.axvline(x=100,color="#DBACC1")
+plt.title("Frequency Distribution Of Notes In The Corpus")
+plt.xlabel("Frequency Of Chords in Corpus")
+plt.ylabel("Number Of Chords")
+plt.show()
+
+
+
+rare_note = []
+for index, (key, value) in enumerate(count_num.items()):
+    if value < 0:
+        m =  key
+        rare_note.append(m)
+        
+print("Total number of notes that occur less than 0 times:", len(rare_note))
+
+for element in Corpus:
+    if element in rare_note:
+        Corpus.remove(element)
+
+print("Length of Corpus after elemination the rare notes:", len(Corpus))
+
+# Storing all the unique characters present in my corpus to bult a mapping dic. 
+symb = sorted(list(set(Corpus)))
+L_corpus = len(Corpus) #length of corpus
+L_symb = len(symb) #length of total unique characters
+
+#Building dictionary to access the vocabulary from indices and vice versa
+mapping = dict((c, i) for i, c in enumerate(symb))
+reverse_mapping = dict((i, c) for i, c in enumerate(symb))
+
+print("Total number of characters:", L_corpus)
+print("Number of unique characters:", L_symb)
+
+#Splitting the Corpus in equal length of strings and output target
+length = 40
+features = []
+targets = []
+for i in range(0, L_corpus - length, 1):
+    feature = Corpus[i:i + length]
+    target = Corpus[i + length]
+    features.append([mapping[j] for j in feature])
+    targets.append(mapping[target])
+    
+    
+L_datapoints = len(targets)
+
+# reshape X and normalize
+X = (np.reshape(features, (L_datapoints, length, 1)))/ float(L_symb)
+# one hot encode the output variable
+y = keras.utils.to_categorical(targets) 
+
+X_train, X_seed, y_train, y_seed = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+
+print("Total number of sequences in the Corpus:", L_datapoints)
+
+
+
+#Melody_Snippet.show()
