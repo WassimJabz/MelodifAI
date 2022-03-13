@@ -44,6 +44,8 @@ for i in os.listdir(filepath):
         print(f"added {i}")
 
 
+
+
 def extract_notes(file):
     """extract notes and chords"""
     notes = []
@@ -62,10 +64,7 @@ def extract_notes(file):
                 #elif isinstance(element, note.Rest):
                  #   notes.append(element)
             
-                
-                
-
-    return notes
+    return notes             
 
 Corpus = extract_notes(all_midis)
 print("Total notes in all the Chopin midis in the dataset:", len(Corpus))
