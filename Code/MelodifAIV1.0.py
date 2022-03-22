@@ -233,7 +233,7 @@ model.add(Dropout(0.1))
 model.add(Dense(y.shape[1], activation='softmax'))
 
 #Compiling the model for training  
-opt = Adamax(learning_rate=0.01)
+opt = Adamax(learning_rate=0.02)
 model.compile(loss='categorical_crossentropy', optimizer=opt)
 
 #Model's Summary               
