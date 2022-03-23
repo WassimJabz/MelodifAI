@@ -1,4 +1,5 @@
 from fractions import Fraction
+from ntpath import join
 import os
 import tensorflow as tf
 from tensorflow import keras
@@ -29,11 +30,6 @@ import warnings
 warnings.filterwarnings("ignore")
 warnings.simplefilter("ignore")
 
-
-model = tf.keras.models.load_model('saved_model/Model 4')
-
-# Check its architecture
-model.summary()
 
 #Set Environment Path Variables
 us = environment.UserSettings()
@@ -258,7 +254,37 @@ X_train, X_seed, y_train, y_seed = train_test_split(X, y, test_size=0.2, random_
 print("Total number of sequences in the Corpus:", L_datapoints)
 
 
+#Initialising the Model
+model = Sequential()
 
+#Adding layers
+model.add(LSTM(1024, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
+model.add(Dropout(0.1))
+model.add(LSTM(512))
+model.add(Dense(512))
+model.add(Dropout(0.1))
+model.add(Dense(y.shape[1], activation='softmax'))
+
+#Compiling the model for training  
+opt = Adamax(learning_rate=0.01)
+model.compile(loss='categorical_crossentropy', optimizer=opt)
+
+#Model's Summary               
+model.summary()
+
+#Training the Model
+history = model.fit(X_train, y_train, batch_size=256, epochs=100)
+
+model.save('saved_model/my_model')
+
+#Plotting the learnings 
+history_df = pd.DataFrame(history.history)
+fig = plt.figure(figsize=(15,4), facecolor="#97BACB")
+fig.suptitle("Learning Plot of Model for Loss")
+pl=sns.lineplot(data=history_df["loss"],color="#444160")
+pl.set(ylabel ="Training Loss")
+pl.set(xlabel ="Epochs")
+plt.show()
 
 def melody_Generator(Note_Count):
     """"Melody Generator"""
@@ -277,9 +303,6 @@ def melody_Generator(Note_Count):
         Music = [reverse_mapping[char] for char in Notes_Generated]
         seed = np.insert(seed[0],len(seed[0]),index_N)
         seed = seed[1:]
-        if i!=0 and i%80 == 0:
-            seed = X_seed[np.random.randint(0,len(X_seed)-1)]
-
     #Now, we have music in form or a list of chords and notes and we want to be a midi file.
     Melody = chords_n_notes(Music)
     Melody_midi = stream.Stream(Melody)   
@@ -290,4 +313,5 @@ def melody_Generator(Note_Count):
 Music_notes, Melody = melody_Generator(400)
 Melody.write('midi','Melody_Generated.mid')
 Melody.show()
+
 
