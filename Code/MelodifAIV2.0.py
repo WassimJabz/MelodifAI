@@ -4,9 +4,11 @@ import os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 import tensorflow.keras.backend as K
-from tensorflow.keras.optimizers import Adamax
+from tensorflow.keras.optimizers import Adamax, RMSprop
+from keras_self_attention import SeqSelfAttention
+
 
 from sklearn.model_selection import train_test_split
 
@@ -24,7 +26,7 @@ from IPython.display import display
 import matplotlib.pyplot as plt 
 import numpy as np 
 from collections import Counter
-
+import json
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -40,26 +42,26 @@ us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3
 
 
 #Load all midi files in Training folder
-path = os.getcwd()
-filepath = os.path.join(path,"dataset\\Train2\\")
-all_midis = []
-midi_names = []
-for i in os.listdir(filepath):
-    if i.endswith(".mid"):
-        tr = filepath+i
-        midi_names.append(str(i))
-        midi = converter.parse(tr)
-        all_midis.append(midi)
-        print(f"added {i}")
+# path = os.getcwd()
+# filepath = os.path.join(path,"dataset\\Train2\\")
+# all_midis = []
+# midi_names = []
+# for i in os.listdir(filepath):
+#     if i.endswith(".mid"):
+#         tr = filepath+i
+#         midi_names.append(str(i))
+#         midi = converter.parse(tr)
+#         all_midis.append(midi)
+#         print(f"added {i}")
 
-filepath2 = os.path.join(path,"dataset\\Train3\\")
-for i in os.listdir(filepath2):
-    if i.endswith(".mid"):
-        tr = filepath2+i
-        midi_names.append(str(i))
-        midi = converter.parse(tr)
-        all_midis.append(midi)
-        print(f"added {i}")
+# filepath2 = os.path.join(path,"dataset\\Train3\\")
+# for i in os.listdir(filepath2):
+#     if i.endswith(".mid"):
+#         tr = filepath2+i
+#         midi_names.append(str(i))
+#         midi = converter.parse(tr)
+#         all_midis.append(midi)
+#         print(f"added {i}")
 
 def extract_notes(file):
     """extract notes and chords"""
@@ -151,67 +153,74 @@ def chords_n_notes(Snippet):
     Melody_midi = stream.Stream(Melody)
     return Melody_midi
 
-Corpus = extract_notes(all_midis)
-print("Total notes in all the Chopin midis in the dataset:", len(Corpus))
+# Corpus = extract_notes(all_midis)
+# print("Total notes in all the Chopin midis in the dataset:", len(Corpus))
 
 
-#Melody_Snippet = stream.Stream(Corpus[:300])
-#Melody_Snippet = all_midis[0]
+# #Melody_Snippet = stream.Stream(Corpus[:300])
+# #Melody_Snippet = all_midis[0]
 
-#Melody_Snippet.show()
+# #Melody_Snippet.show()
 
-count_num = Counter(Corpus)
-print("Total unique notes in the Corpus:", len(count_num))
+# count_num = Counter(Corpus)
+# print("Total unique notes in the Corpus:", len(count_num))
 
-Notes = list(count_num.keys())
-Recurrence = list(count_num.values())
+# Notes = list(count_num.keys())
+# Recurrence = list(count_num.values())
 
-def Average(lst):
-    return sum(lst) / len(lst)
-print("Average recurrenc for a note in Corpus:", Average(Recurrence))
-print("Most frequent note in Corpus appeared:", max(Recurrence), "times")
-print("Least frequent note in Corpus appeared:", min(Recurrence), "time")
+# def Average(lst):
+#     return sum(lst) / len(lst)
+# print("Average recurrenc for a note in Corpus:", Average(Recurrence))
+# print("Most frequent note in Corpus appeared:", max(Recurrence), "times")
+# print("Least frequent note in Corpus appeared:", min(Recurrence), "time")
 
-plt.figure(figsize=(18,3),facecolor="#97BACB")
-bins = np.arange(0,(max(Recurrence)), 10) 
-plt.hist(Recurrence, bins=bins, color="#97BACB")
-plt.axvline(x=100,color="#DBACC1")
-plt.title("Frequency Distribution Of Notes In The Corpus")
-plt.xlabel("Frequency Of Chords in Corpus")
-plt.ylabel("Number Of Chords")
-plt.show()
+# plt.figure(figsize=(18,3),facecolor="#97BACB")
+# bins = np.arange(0,(max(Recurrence)), 10) 
+# plt.hist(Recurrence, bins=bins, color="#97BACB")
+# plt.axvline(x=100,color="#DBACC1")
+# plt.title("Frequency Distribution Of Notes In The Corpus")
+# plt.xlabel("Frequency Of Chords in Corpus")
+# plt.ylabel("Number Of Chords")
+# plt.show()
 
-rare_note = []
-for index, (key, value) in enumerate(count_num.items()):
-    if value < 30:
-        m =  key
-        rare_note.append(m)
+# rare_note = []
+# for index, (key, value) in enumerate(count_num.items()):
+#     if value < 30:
+#         m =  key
+#         rare_note.append(m)
     
     
         
-print("Total number of notes that occur less than 30 times:", len(rare_note))
+# print("Total number of notes that occur less than 30 times:", len(rare_note))
 
 
 
 
-for index, element in enumerate(Corpus):
-    if element in rare_note:
-        if ("$" in element ):
-            p_element = element[1:]
-            dur_and_chord = p_element.split(",")
-            chord_notes = dur_and_chord[1].split(".") #Seperating the notes in chord 
-            new_note = str(dur_and_chord[0]) + "," + str(chord_notes[len(chord_notes)-1])
-            if new_note in rare_note:
-                Corpus.remove(element)
-            elif new_note in Corpus:
-                Corpus[index] = new_note
-            else:
-                Corpus.remove(element)
+# for index, element in enumerate(Corpus):
+#     if element in rare_note:
+#         if ("$" in element ):
+#             p_element = element[1:]
+#             dur_and_chord = p_element.split(",")
+#             chord_notes = dur_and_chord[1].split(".") #Seperating the notes in chord 
+#             new_note = str(dur_and_chord[0]) + "," + str(chord_notes[len(chord_notes)-1])
+#             if new_note in rare_note:
+#                 Corpus.remove(element)
+#             elif new_note in Corpus:
+#                 Corpus[index] = new_note
+#             else:
+#                 Corpus.remove(element)
 
-print("Length of Corpus after elemination the rare notes:", len(Corpus))
+# print("Length of Corpus after elemination the rare notes:", len(Corpus))
 
-count_num2 = Counter(Corpus)
-print("Total unique notes in the Corpus:", len(count_num2))
+# count_num2 = Counter(Corpus)
+# print("Total unique notes in the Corpus:", len(count_num2))
+
+with open('Corpus.json','r') as f:
+    Corpus  = json.load(f)
+
+# Melody = chords_n_notes(Corpus[len(Corpus)-1000:])
+# Melody.write('midi','Corpus.mid')
+# Melody.show()
 
 # Storing all the unique characters present in my corpus to bult a mapping dic. 
 symb = sorted(list(set(Corpus)))
@@ -258,22 +267,24 @@ print("Total number of sequences in the Corpus:", L_datapoints)
 model = Sequential()
 
 #Adding layers
-model.add(LSTM(1024, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
-model.add(Dropout(0.1))
-model.add(LSTM(512))
-model.add(Dense(512))
-model.add(Dropout(0.1))
+model.add(Bidirectional(LSTM(702, return_sequences=True),input_shape=(X.shape[1], X.shape[2])))
+model.add(SeqSelfAttention(attention_activation='sigmoid'))
+model.add(Dropout(0.05))
+model.add(LSTM(702))
+model.add(Dropout(0.05))
+model.add(Dense(702))
 model.add(Dense(y.shape[1], activation='softmax'))
 
 #Compiling the model for training  
-opt = Adamax(learning_rate=0.01)
-model.compile(loss='categorical_crossentropy', optimizer=opt)
+#opt = Adamax(learning_rate=0.01)
+opt = RMSprop(learning_rate=0.01)
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
 
 #Model's Summary               
 model.summary()
 
 #Training the Model
-history = model.fit(X_train, y_train, batch_size=256, epochs=100)
+history = model.fit(X_train, y_train, batch_size=512, epochs=200)
 
 model.save('saved_model/my_model')
 
