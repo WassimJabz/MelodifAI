@@ -1,8 +1,9 @@
 <html>
   <head>
     <title>MelodifAI</title>
+    <link rel="stylesheet" href="stylesheet.css">
     <script>
-      function getData() {
+      function generateMusic() {
         let elem = document.getElementById("file");
         let res = document.getElementById("result");
         fetch("http://localhost:5000/selectionMade", {
@@ -15,9 +16,21 @@
     </script>
   </head>
   <body>
-    Hello world!
-    <button onclick="getData();">Get data</button>
-    <input type="file" id="file" />
-    <div id="result"></div>
+    <img src="ChopinPicture.jpg" class="floatRight" />
+    <div class ="center" id="logo">
+      <h1>MelodifAI</h1>
+    </div>
+    <label>Choose a classical music piece on which you want to base the music generation:</label>
+    <br>
+    <select name="pieces" id="pieces" class="select-css">
+      <option value="1">Chopin Nocturne op 23 n2</option>
+      <option value="2">Chopin Nocturne op 23 n3</option>
+      <option value="3">Chopin Nocturne op 23 n4</option>
+      <option value="4">Chopin Nocturne op 23 n5</option>
+    </select>
+    <br><br>    
+    <button onclick="generateMusic();">Generate music!</button>
+    <br><br><br>
+    <button onclick="downloadMusic();">Download generated music!</button>
   </body>
 </html>
