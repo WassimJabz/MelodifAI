@@ -1,11 +1,11 @@
 <html>
   <head>
-    <title>ML Model</title>
+    <title>MelodifAI</title>
     <script>
       function getData() {
         let elem = document.getElementById("file");
         let res = document.getElementById("result");
-        fetch("http://localhost:5000/data", {
+        fetch("http://localhost:5000/selectionMade", {
           method: "POST",
           body: elem.files[0],
         })

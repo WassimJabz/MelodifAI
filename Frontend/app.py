@@ -13,7 +13,7 @@ model.load_state_dict(torch.load("weights.pth"))
 def index():
     return render_template("index.html")
 
-@app.route("/data", methods=["POST"])
+@app.route("/selectionMade", methods=["POST"])
 def data():
     im = Image.open(io.BytesIO(request.data)).convert("L")
     im = transformation(im).unsqueeze(0)
