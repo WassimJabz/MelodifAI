@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>ML Model</title>
+    <script>
+      function getData() {
+        let elem = document.getElementById("file");
+        let res = document.getElementById("result");
+        fetch("http://localhost:5000/data", {
+          method: "POST",
+          body: elem.files[0],
+        })
+          .then((r) => r.json())
+          .then((r) => (res.innerText = r.data));
+      }
+    </script>
+  </head>
+  <body>
+    Hello world!
+    <button onclick="getData();">Get data</button>
+    <input type="file" id="file" />
+    <div id="result"></div>
+  </body>
+</html>
