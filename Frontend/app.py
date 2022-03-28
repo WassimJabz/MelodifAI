@@ -1,13 +1,18 @@
 import io
-import torch
+import os
+import sys
+
 from flask import Flask, render_template, request
 from PIL import Image
-from model import Model, transformation
 
+
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+from sklearn.model_selection import train_test_split
 import json
 from music21 import *
+from music21 import converter, chord, note, stream, environment, instrument, duration
 
 app = Flask(__name__)
 
@@ -25,7 +30,23 @@ L_symb = len(symb) #length of total unique characters
 mapping = dict((c, i) for i, c in enumerate(symb))
 reverse_mapping = dict((i, c) for i, c in enumerate(symb))
 
+length = 40
+features = []
+targets = []
+for i in range(0, L_corpus - length, 1):
+    feature = Corpus[i:i + length]
+    target = Corpus[i + length]
+    features.append([mapping[j] for j in feature])
+    targets.append(mapping[target])
+    
+    
+L_datapoints = len(targets)
 
+X = (np.reshape(features, (L_datapoints, length, 1)))/ float(L_symb)
+# one hot encode the output variable
+y = keras.utils.to_categorical(targets) 
+
+X_train, X_seed, y_train, y_seed = train_test_split(X, y, test_size=0.2, random_state=42)
 
 @app.route("/")
 def index():
@@ -33,24 +54,18 @@ def index():
 
 @app.route("/selectionMade", methods=["POST"])
 def data():
+    """Generate music based on selection"""
     selection = request.data
-     
-    X_seed = (np.reshape(features, (L_datapoints, length, 1)))/ float(L_symb)
     seed = X_seed[selection]
-    Music_notes, Melody = melody_Generator(80,seed)
+    
+    Music_notes, Melody = melody_generator(80,seed)
     Melody.write('midi','Melody_Generated.mid')
 
 
 
-
-
-
-
-    
-    
     return None
 
-def melody_Generator(Note_Count, seed):
+def melody_generator(Note_Count, seed):
     """"Melody Generator"""
     
     Music = ""
