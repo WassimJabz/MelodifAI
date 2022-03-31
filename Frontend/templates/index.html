@@ -1,27 +1,24 @@
 <html>
   <head>
     <title>MelodifAI</title>
-    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/stylesheet.css') }}" >
     <script>
       function generateMusic() {
         console.log("fetching")
+        let select = document.getElementById('pieces');
+        let input = select.options[select.selectedIndex].value;
         fetch("http://localhost:5000/selectionMade", {
           method: "POST",
-          body: pieces.value,
-        })
-        console.log("fetch complete")
-      }
-      function downloadMusic() {
-        console.log("downloading")
-        fetch("http://localhost:5000/download", {
-          method: "FETCH"
-        })
+          body: input
+        }).then()
         
       }
+      
     </script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   </head>
   <body>
-    <img src="ChopinPicture.jpg" class="floatRight" />
+    <img src="{{ url_for('static',filename='images/ChopinPicture.jpg') }}" class="floatRight" />
     <div class ="center" id="logo">
       <h1>MelodifAI</h1>
     </div>
@@ -36,6 +33,6 @@
     <br><br>    
     <button onclick="generateMusic();">Generate music!</button>
     <br><br><br>
-    <button onclick="downloadMusic();">Download generated music!</button>
+    <a href="/download">Dowload Generated Music!.</a>
   </body>
 </html>
