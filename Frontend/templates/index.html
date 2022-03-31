@@ -4,14 +4,19 @@
     <link rel="stylesheet" href="stylesheet.css">
     <script>
       function generateMusic() {
-        let elem = document.getElementById("file");
-        let res = document.getElementById("result");
+        console.log("fetching")
         fetch("http://localhost:5000/selectionMade", {
           method: "POST",
-          body: elem.files[0],
+          body: pieces.value,
         })
-          .then((r) => r.json())
-          .then((r) => (res.innerText = r.data));
+        console.log("fetch complete")
+      }
+      function downloadMusic() {
+        console.log("downloading")
+        fetch("http://localhost:5000/download", {
+          method: "FETCH"
+        })
+        
       }
     </script>
   </head>
