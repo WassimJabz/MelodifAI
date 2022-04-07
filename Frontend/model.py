@@ -36,7 +36,7 @@ class Model:
      L_corpus = len(self.Corpus) #length of corpus
      self.L_symb = len(symb) #length of total unique characters
      #Building dictionary to access the vocabulary from indices and vice versa
-     mapping = dict((c, i) for i, c in enumerate(symb))
+     self.mapping = dict((c, i) for i, c in enumerate(symb))
      self.reverse_mapping = dict((i, c) for i, c in enumerate(symb))
 
      self.length = 40
@@ -45,8 +45,8 @@ class Model:
      for i in range(0, L_corpus - self.length, 1):
          feature = self.Corpus[i:i + self.length]
          target = self.Corpus[i + self.length]
-         features.append([mapping[j] for j in feature])
-         targets.append(mapping[target])
+         features.append([self.mapping[j] for j in feature])
+         targets.append(self.mapping[target])
      
      
         
@@ -72,6 +72,8 @@ class Model:
      for i in range(Note_Count):
          seed = seed.reshape(1,self.length,1)
          prediction = self.model.predict(seed, verbose=0)[0]
+         np.seterr(divide = 'ignore')
+         prediction = np.where(prediction>0, np.log(prediction), 0) / 1.0
          #prediction = np.log(prediction) / 1.0 #diversity
          exp_preds = np.exp(prediction)
          prediction = exp_preds / np.sum(exp_preds)
@@ -81,13 +83,13 @@ class Model:
          Music = [self.reverse_mapping[char] for char in Notes_Generated]
          seed = np.insert(seed[0],len(seed[0]),index_N)
          seed = seed[1:]
-         if i!=0 and i%40 == 0:
+         if i!=0 and i%20 == 0:
              seed = self.X_seed[np.random.randint(0,len(self.X_seed)-1)]
 
      #Now, we have music in form or a list of chords and notes and we want to be a midi file.
      Melody = self.chords_n_notes(Music)
      Melody_midi = stream.Stream(Melody)
-     Melody_midi.insert(MetronomeMark(number=50))
+     Melody_midi.insert(MetronomeMark(number=60))
       
      return Music,Melody_midi
     
@@ -144,8 +146,8 @@ class Model:
         for i in range(0, len(self.seed) - self.length, 1):
             seed_feature = self.seed[i:i + self.length]
             seed_target = self.seed[i + self.length]
-            self.seed_features.append([seed_mapping[j] for j in seed_feature])
-            seed_targets.append(seed_mapping[seed_target])
+            self.seed_features.append([self.mapping[j] for j in seed_feature])
+            seed_targets.append(self.mapping[seed_target])
         
         self.X_seed = (np.reshape(self.seed_features, (len(seed_targets), self.length, 1)))/ float(self.L_symb)
 

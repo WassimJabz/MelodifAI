@@ -7,22 +7,22 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 import tensorflow.keras.backend as K
 from tensorflow.keras.optimizers import Adamax, RMSprop
-from keras_self_attention import SeqSelfAttention
+#from keras_self_attention import SeqSelfAttention
 
 
 from sklearn.model_selection import train_test_split
 
 import pandas as pd 
-import seaborn as sns
+#import seaborn as sns
 
 import music21
 from music21 import *
 from music21 import converter, chord, note, stream, environment, instrument
 
 import sys
-import IPython
-from IPython.display import Image, Audio
-from IPython.display import display
+#import IPython
+#from IPython.display import Image, Audio
+#from IPython.display import display
 import matplotlib.pyplot as plt 
 import numpy as np 
 from collections import Counter
@@ -37,8 +37,9 @@ warnings.simplefilter("ignore")
 us = environment.UserSettings()
 
 # us['lilypondPath'] = r"C:\\Program Files (x86)\\LilyPond\usr\\bin\\lilypond.exe"
-us['musicxmlPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
-us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
+
+#us['musicxmlPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
+#us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
 
 
 #Load all midi files in Training folder
@@ -266,7 +267,7 @@ for index, e in enumerate(seedCorpus):
 
 print("Length of Corpus after elemination the rare notes:", len(seedCorpus))
 
-with open('seedX.json', 'w') as f:
+with open('seed1.json', 'w') as f:
     json.dump(seedCorpus, f)
 
 #Splitting the Corpus in equal length of strings and output target
