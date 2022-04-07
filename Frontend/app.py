@@ -23,7 +23,6 @@ def index():
 def data():
     midiFile = model.predict(request)
     
-    print(int(request.data))
     return "request successful"
     
 @app.route('/download', methods=["GET","POST"])

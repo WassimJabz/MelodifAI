@@ -4,35 +4,61 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/stylesheet.css') }}" >
     <script>
       function generateMusic() {
-        console.log("fetching")
+        document.getElementById('download').style.display = 'none';
+        document.getElementById('loading').style.display = 'flex';
         let select = document.getElementById('pieces');
         let input = select.options[select.selectedIndex].value;
         fetch("http://localhost:5000/selectionMade", {
           method: "POST",
           body: input
-        }).then()
-        
+        }).then((r) => {
+          document.getElementById('download').style.display = 'flex';
+          document.getElementById('loading').style.display = 'none';
+        })
       }
       
     </script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   </head>
   <body>
-    <img src="{{ url_for('static',filename='images/ChopinPicture.jpg') }}" class="floatRight" />
     <div class ="center" id="logo">
       <h1>MelodifAI</h1>
     </div>
-    <label>Choose a classical music piece on which you want to base the music generation:</label>
+    <h2>Choose a composer who's style you want the music to mimic:</h2>
     <br>
-    <select name="pieces" id="pieces" class="select-css">
-      <option value="1">Chopin Nocturne op 23 n2</option>
-      <option value="2">Chopin Nocturne op 23 n3</option>
-      <option value="3">Chopin Nocturne op 23 n4</option>
-      <option value="4">Chopin Nocturne op 23 n5</option>
-    </select>
-    <br><br>    
-    <button onclick="generateMusic();">Generate music!</button>
-    <br><br><br>
-    <a href="/download">Dowload Generated Music!.</a>
+    <div>
+      <select name="pieces" id="pieces" class="select-css">
+        <option value="1">Chopin</option>
+        <option value="2">Albeniz</option>
+        <option value="3">Bach</option>
+        <option value="4">Balakir</option>
+        <option value="5">Brahms</option>
+        <option value="6">Schubert</option>
+        <option value="7">Schumann</option>
+        <option value="8">Mozart</option>
+        <option value="9">Liszt</option>
+        <option value="10">Debussy</option>
+      </select>
+      <br><br>    
+      <button onclick="generateMusic();">Generate music!</button>
+    </div>
+    <br>
+    <div id="download" style="display:none;">
+      <h3><a href="/download">Done! Download Generated Music!</a></h3>
+    </div>
+    <div id="loading" style="display:none;">
+      <div class="wavediv" style="display:flex;">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+      </div>
+    </div>
   </body>
 </html>
