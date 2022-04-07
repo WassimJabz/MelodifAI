@@ -10,7 +10,7 @@ import json
 import music21
 from music21 import *
 from music21 import converter, chord, note, stream, environment, instrument, duration
-
+from music21.tempo import MetronomeMark
 
 
 class Model:
@@ -26,6 +26,12 @@ class Model:
 
      with open(os.path.join(path[:len(path)-9],'Corpus.json'),'r') as f:
          self.Corpus  = json.load(f)
+
+     
+     
+     
+
+
      symb = sorted(list(set(self.Corpus)))
      L_corpus = len(self.Corpus) #length of corpus
      self.L_symb = len(symb) #length of total unique characters
@@ -41,22 +47,28 @@ class Model:
          target = self.Corpus[i + self.length]
          features.append([mapping[j] for j in feature])
          targets.append(mapping[target])
-        
+     
+     
         
      L_datapoints = len(targets)
 
+     
      X = (np.reshape(features, (L_datapoints, self.length, 1)))/ float(self.L_symb)
      # one hot encode the output variable
      y = keras.utils.to_categorical(targets) 
 
-     X_train, self.X_seed, y_train, y_seed = train_test_split(X, y, test_size=0.2, random_state=42)
+     X_train, X_seedOld, y_train, y_seed = train_test_split(X, y, test_size=0.2, random_state=42)
+
+     
         
 
     def melody_generator(self, Note_Count):
      """"Melody Generator"""
      seed = self.X_seed[np.random.randint(0,len(self.X_seed)-1)]
+     #seed = self.seed1[:40]
      Music = ""
-     Notes_Generated=[]
+     Notes_Generated= []
+
      for i in range(Note_Count):
          seed = seed.reshape(1,self.length,1)
          prediction = self.model.predict(seed, verbose=0)[0]
@@ -69,12 +81,14 @@ class Model:
          Music = [self.reverse_mapping[char] for char in Notes_Generated]
          seed = np.insert(seed[0],len(seed[0]),index_N)
          seed = seed[1:]
-         if i!=0 and i%80 == 0:
+         if i!=0 and i%40 == 0:
              seed = self.X_seed[np.random.randint(0,len(self.X_seed)-1)]
 
      #Now, we have music in form or a list of chords and notes and we want to be a midi file.
      Melody = self.chords_n_notes(Music)
-     Melody_midi = stream.Stream(Melody)   
+     Melody_midi = stream.Stream(Melody)
+     Melody_midi.insert(MetronomeMark(number=50))
+      
      return Music,Melody_midi
     
 
@@ -114,6 +128,31 @@ class Model:
      return Melody_midi
     
     def predict(self, request):
+        path = os.getcwd()
+        file_seed = 'seed' + str(int(request.data)) + '.json' 
+        with open(os.path.join(path[:len(path)-9],file_seed),'r') as f:
+         self.seed  = json.load(f)
+        
+        seed_symb = sorted(list(set(self.Corpus)))
+        self.seed_L_symb = len(seed_symb) #length of total unique characters
+        #Building dictionary to access the vocabulary from indices and vice versa
+        seed_mapping = dict((c, i) for i, c in enumerate(seed_symb))
+
+
+        self.seed_features = []
+        seed_targets = []
+        for i in range(0, len(self.seed) - self.length, 1):
+            seed_feature = self.seed[i:i + self.length]
+            seed_target = self.seed[i + self.length]
+            self.seed_features.append([seed_mapping[j] for j in seed_feature])
+            seed_targets.append(seed_mapping[seed_target])
+        
+        self.X_seed = (np.reshape(self.seed_features, (len(seed_targets), self.length, 1)))/ float(self.L_symb)
+
+
+
+        print(f"loaded {request}")
+
         Music_notes, Melody = self.melody_generator(80)
         Melody.write('midi','Melody_Generated.mid')
         return 'Melody_Generated.mid'

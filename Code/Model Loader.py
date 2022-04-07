@@ -272,7 +272,7 @@ def melody_Generator(Note_Count):
     for i in range(Note_Count):
         seed = seed.reshape(1,length,1)
         prediction = model.predict(seed, verbose=0)[0]
-        prediction = np.log(prediction) / 1.0 #diversity
+        #rediction = np.log(prediction) / 1.0 #diversity
         exp_preds = np.exp(prediction)
         prediction = exp_preds / np.sum(exp_preds)
         index = np.argmax(prediction)

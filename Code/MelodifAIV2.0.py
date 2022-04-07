@@ -42,17 +42,17 @@ us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3
 
 
 #Load all midi files in Training folder
-# path = os.getcwd()
-# filepath = os.path.join(path,"dataset\\Train2\\")
-# all_midis = []
-# midi_names = []
-# for i in os.listdir(filepath):
-#     if i.endswith(".mid"):
-#         tr = filepath+i
-#         midi_names.append(str(i))
-#         midi = converter.parse(tr)
-#         all_midis.append(midi)
-#         print(f"added {i}")
+path = os.getcwd()
+filepath = os.path.join(path,"dataset\\seedMusic\\")
+all_midis = []
+midi_names = []
+for i in os.listdir(filepath):
+    if i.endswith(".mid"):
+        tr = filepath+i
+        midi_names.append(str(i))
+        midi = converter.parse(tr)
+        all_midis.append(midi)
+        print(f"added {i}")
 
 # filepath2 = os.path.join(path,"dataset\\Train3\\")
 # for i in os.listdir(filepath2):
@@ -153,8 +153,8 @@ def chords_n_notes(Snippet):
     Melody_midi = stream.Stream(Melody)
     return Melody_midi
 
-# Corpus = extract_notes(all_midis)
-# print("Total notes in all the Chopin midis in the dataset:", len(Corpus))
+#Corpus = extract_notes(all_midis)
+#print("Total notes in all the Chopin midis in the dataset:", len(Corpus))
 
 
 # #Melody_Snippet = stream.Stream(Corpus[:300])
@@ -162,8 +162,8 @@ def chords_n_notes(Snippet):
 
 # #Melody_Snippet.show()
 
-# count_num = Counter(Corpus)
-# print("Total unique notes in the Corpus:", len(count_num))
+#count_num = Counter(Corpus)
+#print("Total unique notes in the Corpus:", len(count_num))
 
 # Notes = list(count_num.keys())
 # Recurrence = list(count_num.values())
@@ -183,7 +183,7 @@ def chords_n_notes(Snippet):
 # plt.ylabel("Number Of Chords")
 # plt.show()
 
-# rare_note = []
+#rare_note = []
 # for index, (key, value) in enumerate(count_num.items()):
 #     if value < 30:
 #         m =  key
@@ -236,7 +236,38 @@ print("Number of unique characters:", L_symb)
 
 #Melody_Snippet = chords_n_notes(Corpus[:600])
 #Melody_Snippet.show()
+count_num = Counter(Corpus)
 
+seedCorpus = extract_notes(all_midis)
+
+toRemove =[]
+print("Total unique notes in the seed Corpus:", len(seedCorpus))
+for index, element in enumerate(seedCorpus):
+     if  not element in symb:
+         toRemove.append(element)
+
+for index, e in enumerate(seedCorpus):
+    if e in toRemove:
+        if ("$" in e ):
+            p_e = e[1:]
+            dur_and_chord = p_e.split(",")
+            chord_notes = dur_and_chord[1].split(".") #Seperating the notes in chord 
+            new_note = str(dur_and_chord[0]) + "," + str(chord_notes[len(chord_notes)-1])
+            if not new_note in symb:
+                seedCorpus.remove(e)
+            elif new_note in symb:
+                seedCorpus[index] = new_note
+            else:
+                seedCorpus.remove(e)
+        else:
+            seedCorpus.remove(e)
+   
+
+
+print("Length of Corpus after elemination the rare notes:", len(seedCorpus))
+
+with open('seedX.json', 'w') as f:
+    json.dump(seedCorpus, f)
 
 #Splitting the Corpus in equal length of strings and output target
 length = 40
