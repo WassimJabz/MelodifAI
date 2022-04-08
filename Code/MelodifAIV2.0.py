@@ -7,22 +7,22 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 import tensorflow.keras.backend as K
 from tensorflow.keras.optimizers import Adamax, RMSprop
-#from keras_self_attention import SeqSelfAttention
+from keras_self_attention import SeqSelfAttention
 
 
 from sklearn.model_selection import train_test_split
 
 import pandas as pd 
-#import seaborn as sns
+import seaborn as sns
 
 import music21
 from music21 import *
 from music21 import converter, chord, note, stream, environment, instrument
 
 import sys
-#import IPython
-#from IPython.display import Image, Audio
-#from IPython.display import display
+import IPython
+from IPython.display import Image, Audio
+from IPython.display import display
 import matplotlib.pyplot as plt 
 import numpy as np 
 from collections import Counter
@@ -36,24 +36,24 @@ warnings.simplefilter("ignore")
 #Set Environment Path Variables
 us = environment.UserSettings()
 
-# us['lilypondPath'] = r"C:\\Program Files (x86)\\LilyPond\usr\\bin\\lilypond.exe"
+ #us['lilypondPath'] = r"C:\\Program Files (x86)\\LilyPond\usr\\bin\\lilypond.exe"
 
-#us['musicxmlPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
-#us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
+us['musicxmlPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
+us['musescoreDirectPNGPath'] = r"C:\\Program Files\\MuseScore 3\\bin\\MuseScore3.exe"
 
 
 #Load all midi files in Training folder
-path = os.getcwd()
-filepath = os.path.join(path,"dataset\\seedMusic\\")
-all_midis = []
-midi_names = []
-for i in os.listdir(filepath):
-    if i.endswith(".mid"):
-        tr = filepath+i
-        midi_names.append(str(i))
-        midi = converter.parse(tr)
-        all_midis.append(midi)
-        print(f"added {i}")
+#path = os.getcwd()
+#filepath = os.path.join(path,"dataset\\seedMusic\\")
+#all_midis = []
+#midi_names = []
+#for i in os.listdir(filepath):
+#    if i.endswith(".mid"):
+#        tr = filepath+i
+#        midi_names.append(str(i))
+#        midi = converter.parse(tr)
+#        all_midis.append(midi)
+#        print(f"added {i}")
 
 # filepath2 = os.path.join(path,"dataset\\Train3\\")
 # for i in os.listdir(filepath2):
@@ -239,36 +239,37 @@ print("Number of unique characters:", L_symb)
 #Melody_Snippet.show()
 count_num = Counter(Corpus)
 
-seedCorpus = extract_notes(all_midis)
+#seedCorpus = extract_notes(all_midis)
 
-toRemove =[]
-print("Total unique notes in the seed Corpus:", len(seedCorpus))
-for index, element in enumerate(seedCorpus):
-     if  not element in symb:
-         toRemove.append(element)
 
-for index, e in enumerate(seedCorpus):
-    if e in toRemove:
-        if ("$" in e ):
-            p_e = e[1:]
-            dur_and_chord = p_e.split(",")
-            chord_notes = dur_and_chord[1].split(".") #Seperating the notes in chord 
-            new_note = str(dur_and_chord[0]) + "," + str(chord_notes[len(chord_notes)-1])
-            if not new_note in symb:
-                seedCorpus.remove(e)
-            elif new_note in symb:
-                seedCorpus[index] = new_note
-            else:
-                seedCorpus.remove(e)
-        else:
-            seedCorpus.remove(e)
+#toRemove =[]
+#print("Total unique notes in the seed Corpus:", len(seedCorpus))
+#for index, element in enumerate(seedCorpus):
+#     if  not element in symb:
+#         toRemove.append(element)
+
+#for index, e in enumerate(seedCorpus):
+#    if e in toRemove:
+#        if ("$" in e ):
+#            p_e = e[1:]
+#            dur_and_chord = p_e.split(",")
+#            chord_notes = dur_and_chord[1].split(".") #Seperating the notes in chord 
+#            new_note = str(dur_and_chord[0]) + "," + str(chord_notes[len(chord_notes)-1])
+#            if not new_note in symb:
+#                seedCorpus.remove(e)
+#            elif new_note in symb:
+#                seedCorpus[index] = new_note
+#            else:
+#                seedCorpus.remove(e)
+#        else:
+#            seedCorpus.remove(e)
    
 
 
-print("Length of Corpus after elemination the rare notes:", len(seedCorpus))
+#print("Length of Corpus after elemination the rare notes:", len(seedCorpus))
 
-with open('seed1.json', 'w') as f:
-    json.dump(seedCorpus, f)
+#with open('seed1.json', 'w') as f:
+#    json.dump(seedCorpus, f)
 
 #Splitting the Corpus in equal length of strings and output target
 length = 40
