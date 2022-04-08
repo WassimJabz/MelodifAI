@@ -1,5 +1,6 @@
 # MelodifAI
 
+For more information about this project please vis our [Devpost](https://devpost.com/software/melodifai).
 
 # Requirements
 - Pyton 3.x
