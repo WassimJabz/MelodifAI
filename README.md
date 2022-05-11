@@ -3,7 +3,7 @@
 For more information about this project please visit our [Devpost](https://devpost.com/software/melodifai).
 
 # Requirements
-- Pyton 3.x
+- Python 3.x
 - Tensorflow
 - Flask
 - Music21
